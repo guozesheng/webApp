@@ -12,27 +12,27 @@ namespace webApp
     {
         static void Main(string[] args)
         {
-            string url = "http://www.flvcd.com/parse.php?kw=http://bugu.cntv.cn/news/information/zztx/classpage/video/20121023/100910.shtml&format=high&flag=one";
+            string url = "http://bugu.cntv.cn/news/information/zztx/videopage/index.shtml";
+            //string url = "http://www.flvcd.com/parse.php?kw=http://bugu.cntv.cn/news/information/zztx/classpage/video/20121023/100910.shtml&format=high&flag=one";
             //string url = "http://www.flvcd.com/parse.php?kw=http://bugu.cntv.cn/news/information/zztx/classpage/video/20121023/100910.shtml&format=normal&flag=one";
+
             apptest a = new apptest(url);
             a.StartGet();
 
+            Console.WriteLine("Press any key to continue");
             Console.ReadLine();
         }
     }
 
     public class apptest
     {
-        private string _keyStart = "m3uForm";
-        private string _keyEnd = "filename";
-
         private string _url;
 
         public apptest(string url)
         {
             this._url = url;
 
-            string strHtml = getHttpWebRequest(url);
+            //string strHtml = getHttpWebRequest(url);
         }
 
         public void StartGet()
@@ -41,12 +41,33 @@ namespace webApp
             int endIndex = 0;
             string addr;
             bool isParse = true;
+            string strHtml;
             List<string> addrList = new List<string>();
 
-            string strHtml = getHttpWebRequest(this._url);
+            int yest = Convert.ToInt32(DateTime.Now.ToString("yyyyMMdd")) - 1;
+            string yestoday = yest.ToString();
 
-            startIndex = strHtml.IndexOf(this._keyStart);
-            endIndex = strHtml.IndexOf(this._keyEnd);
+            strHtml = getHttpWebRequest(this._url);
+
+            startIndex = strHtml.IndexOf(yestoday) + 20;
+            if (startIndex < 0)
+            {
+                return;
+            }
+            startIndex = strHtml.IndexOf("http", startIndex);
+            if (startIndex < 0)
+            {
+                return;
+            }
+            endIndex = strHtml.IndexOf("shtml", startIndex);
+
+            string url = strHtml.Substring(startIndex, endIndex - startIndex + 5);
+            url = "http://www.flvcd.com/parse.php?kw=" + url + "&format=high&flag=one";
+
+            strHtml = getHttpWebRequest(url);
+
+            startIndex = strHtml.IndexOf("m3uForm");
+            endIndex = strHtml.IndexOf("filename");
 
             strHtml = strHtml.Substring(startIndex, endIndex - startIndex);
 
